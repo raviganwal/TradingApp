@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tradingapp/HomeScreen/HomeScreen.dart';
 import 'package:tradingapp/LoginScreen/responsive_ui.dart';
 import 'package:tradingapp/LoginScreen/FadeAnimation.dart';
+import 'package:tradingapp/Model/AddPostModel.dart';
 import 'package:tradingapp/Model/ProposalModel.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:tradingapp/NewPostScreen/User.dart';
@@ -67,17 +68,101 @@ class _NewPostScreenState extends State<NewPostScreen>{
   List<Company> _companies = Company.getCompanies();
   List<DropdownMenuItem<Company>> _dropdownMenuItems;
   Company _selectedCompany;
-  bool _isChecked = false;
-  bool _isChecked1 = false;
-  bool _isChecked2 = false;
+  bool _isCheckedCase = false;
+  bool _isCheckedHalfCase = false;
+  bool _isCheckedOnline = false;
+  bool _isCheckedDispatch = false;
+  bool _isCheckedStore = false;
+
+  int _currCheckedCase ;
+  int _currHalfCase ;
+  int _currCheckedOnline ;
+
+  int _currCheckedDispatch ;
+  int _currCheckedStore ;
 
   User selectedUser;
   int selectedRadio;
   int selectedRadioTile;
 
+  bool _visibleTranportBtn = false;
+  bool _visibleStoreBtn = false;
+
   List<ColorsParent> _colors = ColorsParent.getColors();
   List<DropdownMenuItem<ColorsParent>> _dropdownMenuItems1;
   ColorsParent _selectedColor;
+  var GetPaymentModeValue = "";
+//----------------------------------------------------------------------------------------------//
+
+  void _ShowHideTransportBtns() {
+    if(_currCheckedDispatch == 4){
+      //print("GetValueDispatch"+_currCheckedDispatch.toString());
+      setState(() {
+        _visibleTranportBtn = !_visibleTranportBtn;
+        _visibleStoreBtn = false;
+      });
+    }else if (_currCheckedDispatch != _currCheckedDispatch){
+      _visibleTranportBtn = false;
+      _visibleStoreBtn = false;
+    }
+  }
+//----------------------------------------------------------------------------------------------//
+  void _ShowHideLocationBtns() {
+    if(_currCheckedStore == 5){
+      //print("GetValueStore"+_currCheckedStore.toString());
+      setState(() {
+        _visibleStoreBtn = !_visibleStoreBtn;
+        _visibleTranportBtn = false;
+      });
+    }else if (_currCheckedStore == _currCheckedStore){
+      _visibleTranportBtn = false;
+      _visibleStoreBtn = false;
+
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------//
+  void _GetPaymentModeValue() {
+    if(_currCheckedCase == _currCheckedCase){
+     // print("GetValueCase"+_currCheckedCase.toString());
+      setState(() {
+        GetPaymentModeValue = _currCheckedCase.toString();
+        print("ReciveValueCase"+GetPaymentModeValue);
+      });
+    }else if(_currCheckedCase != _currCheckedCase){
+      setState(() {
+        GetPaymentModeValue = _currCheckedCase.toString();
+        _currCheckedOnline = 0;
+        //print("NotEqualHalfCase  "  +GetPaymentModeValue);
+      });
+    }
+    if(_currHalfCase == 2){
+     // print("GetValueHalfCase"+_currHalfCase.toString());
+      setState(() {
+        GetPaymentModeValue = _currHalfCase.toString();
+        print("ReciveValueHalfCase"+GetPaymentModeValue);
+
+      });
+    }
+    else if(_currHalfCase != 2){
+      setState(() {
+        GetPaymentModeValue = _currHalfCase.toString();
+       // print("NotEqualHalfCase  "  +GetPaymentModeValue);
+      });
+    }
+    if(_currCheckedOnline == 3){
+      //print("GetValueOnline"+_currCheckedOnline.toString());
+      setState(() {
+        GetPaymentModeValue = _currCheckedOnline.toString();
+        print("ReciveValueOnline"+GetPaymentModeValue);
+      });
+    }else if(_currCheckedOnline != 3){
+      setState(() {
+        GetPaymentModeValue = _currCheckedOnline.toString();
+        //print("NotEqualHalfCase  "  +GetPaymentModeValue);
+      });
+    }
+  }
 //----------------------------------------------------------------------------------------------//
   @override
   void initState() {
@@ -94,7 +179,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
 
     super.initState();
   }
-
+//----------------------------------------------------------------------------------------------//
   setSelectedRadio(int val) {
     setState(() {
       selectedRadio = val;
@@ -112,13 +197,14 @@ class _NewPostScreenState extends State<NewPostScreen>{
       selectedUser = user;
     });
   }
+  //----------------------------------------------------------------------------------------------//
   List<DropdownMenuItem<Company>> buildDropdownMenuItems(List companies) {
     List<DropdownMenuItem<Company>> items = List();
     for (Company company in companies) {
       items.add(
         DropdownMenuItem(
           value: company,
-          child: Text(company.name),
+          child: Text(company.name,style: new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),),
           ),
         );
     }
@@ -131,51 +217,54 @@ class _NewPostScreenState extends State<NewPostScreen>{
       items.add(
         DropdownMenuItem(
           value: company,
-          child: Text(company.ColorName),
+          child: Text(company.ColorName,style: new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300,),),
           ),
         );
     }
     return items;
   }
-
+//----------------------------------------------------------------------------------------------//
   onChangeDropdownItem(Company selectedCompany) {
     setState(() {
       _selectedCompany = selectedCompany;
     });
   }
+//----------------------------------------------------------------------------------------------//
   onChangeDropdownItem1(ColorsParent selectedcolor) {
     setState(() {
       _selectedColor = selectedcolor;
     });
   }
+//----------------------------------------------------------------------------------------------//
   Future<void> ReciveUserdetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    ReciveUserID = prefs.getString(Preferences.KEY_UserID).toString();
-    ReciveUserEmail = prefs.getString(Preferences.KEY_Email).toString();
-    ReciveUserFullName = prefs.getString(Preferences.KEY_FullName).toString();
-    print("Akash"+ReciveUserFullName);
-    print("Email"+ReciveUserEmail);
+    print("ReciveUserdetails");
+    setState(() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      ReciveUserID = prefs.getString(Preferences.KEY_UserID).toString();
+      ReciveUserEmail = prefs.getString(Preferences.KEY_Email).toString();
+      ReciveUserFullName = prefs.getString(Preferences.KEY_FullName).toString();
+    });
+
   }
 //---------------------------------------------------------------------------------------------------//
   String PostAddurl ='http://192.168.0.200/anuj/ATMA/NewAdvPost.php';
   PostAdd() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     ReciveUserID = prefs.getString(Preferences.KEY_UserID).toString();
-    ReciveUserEmail = prefs.getString(Preferences.KEY_Email).toString();
-    ReciveUserFullName = prefs.getString(Preferences.KEY_FullName).toString();
-    print("Akash"+ReciveUserFullName);
     http.post(PostAddurl, body: {
+      "Token": GlobalStringText.Token,
+      "User_ID": ReciveUserID.toString(),
       "Title": TitleController.text.toString(),
       "Description": DescriptionController.text.toString(),
       "Quantity": QuantityController.text.toString(),
       "Price": PriceController.text.toString(),
+      "Type": _selectedCompany.name.toString(),
+      "ColorPercentage": _selectedColor.ColorName.toString(),
+      "PaymentMode": GetPaymentModeValue.toString(),
       "Transport": TransportController.text.toString(),
       "Location": LocationController.text.toString(),
-      "Type": _selectedCompany.name.toString(),
-      "User_ID": ReciveUserID.toString(),
-      "DispatchOrStore": ReciveUserID.toString(),
-      "ColorPercentage": _selectedColor.ColorName.toString(),
-      "Token": GlobalStringText.Token
+
+
     }).then((resultPostAdd) {
       print("User_ID"+ReciveUserID.toString());
       print("uploadEndPoint"+PostAddurl.toString());
@@ -185,20 +274,114 @@ class _NewPostScreenState extends State<NewPostScreen>{
       print("Quantity"+QuantityController.text.toString());
       print( "Description"+ DescriptionController.text.toString());
       print( "Location"+ LocationController.text.toString());
-      print( "DispatchOrStore"+ ReciveUserID.toString());
       print( "Type"+ _selectedCompany.name.toString());
       print( "ColorPercentage"+_selectedColor.ColorName.toString());
+      print( "PaymentMode"+GetPaymentModeValue.toString());
       print("Token" + GlobalStringText.Token);
       print("statusCode" + resultPostAdd.statusCode.toString());
       print("resultbody" + resultPostAdd.body);
-      //return result.body.toString();
 //------------------------------------------------------------------------------------------------------------//
       setStatus(resultPostAdd.statusCode == 200 ? resultPostAdd.body : errMessage);
-      var data = json.decode(resultPostAdd.body);
+      print("jsonresp ${resultPostAdd.body}");
+
+
+      data = json.decode(resultPostAdd.body);
+      if(!data['STATUS']==true) {
+        _displaySnackbar(context);
+        _StatusTrueAlert();
+        return;
+      }else if (!data['STATUS']==false){
+        _displaySnackbar(context);
+        _StatusFalseAlert();
+      }
 
     }).catchError((error) {
       setStatus(error);
     });
+  }
+  //----------------------------------------------------------------------------------------------//
+  void  _displaySnackbar(BuildContext context) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      duration: Duration(seconds: 1),
+      content: Text(GlobalStringText.PleaseWait,style: TextStyle(color: ColorCode.WhiteTextColorCode),),
+      backgroundColor: ColorCode.AppColorCode,
+      ));
+  }
+//-----------------------------------------------------------------------------------------------//
+  Future<void> _StatusTrueAlert() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(GlobalStringText.SomethingWentWrong, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(data['MSG'].toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.AppColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                _scaffoldKey.currentState.hideCurrentSnackBar();
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.TryAgain, style: new TextStyle(fontSize: 15.0,
+                                                                              color: ColorCode.AppColorCode,
+                                                                              fontWeight: FontWeight
+                                                                                  .bold),),
+              ),
+          ],
+          );
+      },
+      );
+  }
+  //-------------------------------------------------------------------------------------------------------------//
+  Future<void> _StatusFalseAlert() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(GlobalStringText.SomethingWentWrong, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(data['MSG'].toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.AppColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                _scaffoldKey.currentState.hideCurrentSnackBar();
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.TryAgain, style: new TextStyle(fontSize: 15.0,
+                                                                              color: ColorCode.AppColorCode,
+                                                                              fontWeight: FontWeight
+                                                                                  .bold),),
+              ),
+          ],
+          );
+      },
+      );
   }
 //----------------------------------------------------------------------------------------------//
   setStatus(String message) {
@@ -242,7 +425,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                     //helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Title',labelStyle:
                   new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                    prefixIcon: const Icon(FontAwesomeIcons.heading,  color:Color(0xFFCEA910),),
+                    prefixIcon: const Icon(FontAwesomeIcons.heading,size: 15.0,  color:Color(0xFFCEA910),),
                     prefixText: ' ',
                     //suffixText: 'USD',
                     //suffixStyle: const TextStyle(color: Colors.green)
@@ -263,7 +446,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                     //helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Description',labelStyle:
                   new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                    prefixIcon: const Icon(FontAwesomeIcons.info, color:Color(0xFFCEA910),),
+                    prefixIcon: const Icon(FontAwesomeIcons.info,size: 15.0, color:Color(0xFFCEA910),),
                     prefixText: ' ',
                     //suffixText: 'USD',
                     //suffixStyle: const TextStyle(color: Colors.green)
@@ -285,7 +468,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                     //helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Quantity',labelStyle:
                   new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                    prefixIcon: const Icon(FontAwesomeIcons.weight,  color:Color(0xFFCEA910),),
+                    prefixIcon: const Icon(FontAwesomeIcons.weight,size: 15.0,  color:Color(0xFFCEA910),),
                     prefixText: ' ',
                     //suffixText: 'USD',
                     //suffixStyle: const TextStyle(color: Colors.green)
@@ -307,13 +490,14 @@ class _NewPostScreenState extends State<NewPostScreen>{
                     //helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Enter Price',labelStyle:
                   new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                    prefixIcon: const Icon(FontAwesomeIcons.rupeeSign,  color:Color(0xFFCEA910),),
+                    prefixIcon: const Icon(FontAwesomeIcons.rupeeSign,size: 15.0,  color:Color(0xFFCEA910),),
                     prefixText: ' ',
                     //suffixText: 'USD',
                     //suffixStyle: const TextStyle(color: Colors.green)
                     ),
                   ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 5.0),
+
 //------------------------------------------------------------------------------------------------------------//
           new Container(
             color: Colors.white24,
@@ -322,7 +506,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                 new ListTile(
                   title: new Text(
                     GlobalStringText.Type.toUpperCase(),textAlign: TextAlign.start,
-                    style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold,color: ColorCode.AppColorCode),
+                    style: new TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold,color: ColorCode.AppColorCode),
                     ),
 
                   subtitle: new Column(
@@ -342,7 +526,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
               ),
 
             ),
-                SizedBox(height: 10.0),
+              //  SizedBox(height: 10.0),
 //------------------------------------------------------------------------------------------------------------//
           new Container(
             color: Colors.white24,
@@ -351,9 +535,8 @@ class _NewPostScreenState extends State<NewPostScreen>{
                 new ListTile(
                   title: new Text(
                     GlobalStringText.Colorpercentage.toUpperCase(),textAlign: TextAlign.start,
-                    style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold,color:ColorCode.AppColorCode),
+                    style: new TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold,color:ColorCode.AppColorCode),
                     ),
-
                   subtitle: new Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,181 +552,228 @@ class _NewPostScreenState extends State<NewPostScreen>{
 
               ],
               ),
-
             ),
-                SizedBox(height: 10.0),
-//------------------------------------------------------------------------------------------------------------//
-        new Container(
-          color: Colors.white24,
-          child: new Row(
-            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              new Row(
-                children: <Widget>[
-                  new Container(
-                    child: new Image(
-                      image: new AssetImage("assets/images/greenstar.png"),
-                      ),
-                    margin: const EdgeInsets.only(left:30.0),
-                    width: 20.0,
-                    height: 20.0,
-                    ),
-                  new Checkbox(
-                    activeColor:ColorCode.AppColorCode,
-                    value: _isChecked,
-                    onChanged: (val) {
-                      setState(() {
-                        _isChecked = val;
-                        //Navigator.of(context).pushNamed(MobileNo.tag);
-                        print('English_Language');
-                      });
-                    },
-                    ),
-                  new Container(
-                    child: new Image(
-                      image: new AssetImage("assets/images/lace.png"),
-                      ),
-                    margin: const EdgeInsets.only(left:40.0),
-                    width: 20.0,
-                    height: 20.0,
-                    ),
-                  new Checkbox(
-                    activeColor:ColorCode.AppColorCode,
-                    value: _isChecked1,
-                    onChanged: (val) {
-                      setState(() {
-                        _isChecked1 = val;
-                        //Navigator.of(context).pushNamed(MobileNo.tag);
-                        print('English_Language');
-                      });
-                    },
-                    ),
-                  new Container(
-                    child: new Image(
-                      image: new AssetImage("assets/images/red.png"),
-                      ),
-                    margin: const EdgeInsets.only(left:50.0),
-                    width: 20.0,
-                    height: 20.0,
-                    ),
-                  new Checkbox(
-                    activeColor:ColorCode.AppColorCode,
-                    value: _isChecked2,
-                    onChanged: (val) {
-                      setState(() {
-                        _isChecked2 = val;
-                        //Navigator.of(context).pushNamed(MobileNo.tag);
-                        print('English_Language');
-                      });
-                    },
-                    ),
-                ],
-                ),
-            ],
-            ),
-          ),
-                SizedBox(height: 10.0),
-//------------------------------------------------------------------------------------------------------------//
-        new Container(
-          color: Colors.white24,
-          child: new Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              new Row(
-                children: <Widget>[
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child:
-                    RadioListTile(
-                      value: 1,
-                      groupValue: selectedRadioTile,
-                      title: Text(""),
-                      subtitle: Text(""),
-                      onChanged: (val) {
-                        print("Radio Tile pressed $val");
-
-                        setSelectedRadioTile(val);
-                      },
-                      activeColor:ColorCode.AppColorCode,
-                      secondary: OutlineButton(
-                        child: Text("Dispatch"),
-                        onPressed: () {
-                          print("Say Hello");
-                        },
-                        //onPressed: _neverSatisfied,
+                Divider(
+                  color: ColorCode.AppColorCode,
+                  ),
+//-----------------------------------------------------------------------------------------------------------------//
+                new Container(
+                  padding: new EdgeInsets.only(left:10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Text(GlobalStringText.PaymentMode.toUpperCase(),textAlign: TextAlign.center,style: TextStyle(color: ColorCode.AppColorCode,fontSize: 13.0, fontWeight: FontWeight.bold,),),
+                        ],
                         ),
-                      selected: true,
-                      ),
-                    ),
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child:
-                    RadioListTile(
-                      value: 2,
-                      groupValue: selectedRadioTile,
-                      title: Text(""),
-                      subtitle: Text(""),
-                      onChanged: (val) {
-                        // print("Radio Tile pressed $val");
-                        setSelectedRadioTile(val);
-                      },
-                      activeColor:ColorCode.AppColorCode,
-                      secondary: OutlineButton(
-                        child: Text("Store"),
-                        onPressed: () {
-                          // print("Say Hello");
-                        },
-                        ),
-                      selected: false,
-                      ),
-                    )
-                ],
-                ),
-            ],
-            ),
-          ),
-                SizedBox(height: 10.0),
-//------------------------------------------------------------------------------------------------------------//
-                new TextFormField(
-                  focusNode: myFocusNodeTransport,
-                  controller: TransportController,
-                  validator: validateTransport,
-                  onSaved: (String val) {
-                    Transport = val;
-                  },
-                  decoration: new InputDecoration(
-                    border: new OutlineInputBorder(),
-                    hintText: 'Enter Transport',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                    //helperText: 'Keep it short, this is just a demo.',
-                    labelText: 'Transport',labelStyle:
-                  new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                    prefixIcon: const Icon(FontAwesomeIcons.truck,  color:Color(0xFFCEA910),),
-                    prefixText: ' ',
-                    //suffixText: 'USD',
-                    //suffixStyle: const TextStyle(color: Colors.green)
+                    ],
                     ),
                   ),
                 SizedBox(height: 10.0),
-//------------------------------------------------------------------------------------------------------------//
-                new TextFormField(
-                  focusNode: myFocusNodeLocation,
-                  controller: LocationController,
-                  validator: validateLocation,
-                  onSaved: (String val) {
-                    Location = val;
-                  },
-                  decoration: new InputDecoration(
-                    border: new OutlineInputBorder(),
-                    hintText: 'Enter Location',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                    //helperText: 'Keep it short, this is just a demo.',
-                    labelText: 'Location',labelStyle:
-                  new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                    prefixIcon: const Icon(FontAwesomeIcons.locationArrow,  color:Color(0xFFCEA910),),
-                    prefixText: ' ',
-                    //suffixText: 'USD',
-                    //suffixStyle: const TextStyle(color: Colors.green)
+//-----------------------------------------------------------------------------------------------------------------//
+                new Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      // [Monday] checkbox
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Icon(
+                            FontAwesomeIcons.solidStar,color: ColorCode.GreenTextColorCode,
+                            size: 15.0,
+                            ),
+                          Checkbox(
+                            activeColor:ColorCode.AppColorCode,
+                            value: _isCheckedCase,
+                            onChanged: (bool valCase) {
+                              setState(() {
+                                _isCheckedHalfCase =false;
+                                _isCheckedOnline =false;
+                                _isCheckedCase = valCase;
+                                if (valCase == true) {
+                                  _currCheckedCase = 1;
+                                }
+                                //print(_currCheckedCase.toString());
+                                _GetPaymentModeValue();
+                              });
+                            },
+                            ),
+                        ],
+                        ),
+                      new Container(
+                        width: 40.0,
+                        ),
+//-----------------------------------------------------------------------------------------------------------------//
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Icon(
+                            FontAwesomeIcons.solidStar,color: ColorCode.BlackTextColorCode,
+                            size: 15.0,
+                            ),
+                          Checkbox(
+                            activeColor:ColorCode.AppColorCode,
+                            value: _isCheckedHalfCase,
+                            onChanged: (bool valHalfCase) {
+                              setState(() {
+                                _isCheckedCase =false;
+                                _isCheckedOnline =false;
+                                _isCheckedHalfCase = valHalfCase;
+                                if (valHalfCase == true) {
+                                  _currHalfCase = 2;
+                                }
+                                //print(_currHalfCase.toString());
+                                _GetPaymentModeValue();
+                              });
+                            },
+                            ),
+                        ],
+                        ),
+                      new Container(
+                        width: 40.0,
+                        ),
+//-----------------------------------------------------------------------------------------------------------------//
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Icon(
+                            FontAwesomeIcons.solidStar,color: ColorCode.RedTextColorCode,
+                            size: 15.0,
+                            ),
+                          Checkbox(
+                            activeColor:ColorCode.AppColorCode,
+                            value: _isCheckedOnline,
+                            onChanged: (bool valOnline) {
+                              setState(() {
+                                _isCheckedCase =false;
+                                _isCheckedHalfCase =false;
+                                _isCheckedOnline = valOnline;
+                                if (valOnline == true) {
+                                  _currCheckedOnline = 3;
+                                }
+                               // print(_currCheckedOnline.toString());
+                                _GetPaymentModeValue();
+                              });
+                            },
+                            ),
+                        ],
+                        ),
+                    ],
                     ),
                   ),
+                Divider(
+                  color: ColorCode.AppColorCode,
+                  ),
+//-----------------------------------------------------------------------------------------------------------------//
+                new Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Text(GlobalStringText.Dispatch.toUpperCase(),textAlign: TextAlign.center,style: TextStyle(color: ColorCode.AppColorCode,fontSize: 13.0, fontWeight: FontWeight.bold,),),
+                          Checkbox(
+                            activeColor:ColorCode.AppColorCode,
+                            value: _isCheckedDispatch,
+                            onChanged: (bool valDispatch) {
+                              setState(() {
+                                _isCheckedStore =false;
+                                _isCheckedDispatch = valDispatch;
+                                if (valDispatch == true) {
+                                  _currCheckedDispatch = 4;
+                                }
+                                print(_currCheckedDispatch.toString());
+                                _ShowHideTransportBtns();
+                              });
+                            },
+                            ),
+                        ],
+                        ),
+                        new Container(
+                          width: 30.0,
+                        ),
+//-----------------------------------------------------------------------------------------------------------------//
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Text(GlobalStringText.Store.toUpperCase(),textAlign: TextAlign.center,style: TextStyle(color: ColorCode.AppColorCode,fontSize: 13.0, fontWeight: FontWeight.bold,),),
+                          Checkbox(
+                            activeColor:ColorCode.AppColorCode,
+                            value: _isCheckedStore,
+                            onChanged: (bool valStore) {
+                              setState(() {
+                                _isCheckedDispatch =false;
+                                _isCheckedStore = valStore;
+                                if (valStore == true) {
+                                  _currCheckedStore = 5;
+                                }
+                                print(_currCheckedStore.toString());
+                                _ShowHideLocationBtns();
+                              });
+                            },
+                            ),
+                        ],
+                        ),
+
+                    ],
+                    ),
+                  ),
+                Divider(
+                  color: ColorCode.AppColorCode,
+                  ),
+//------------------------------------------------------------------------------------------------------------------//
+                Visibility(
+                  visible: _visibleTranportBtn,
+                  child:   new TextFormField(
+                    focusNode: myFocusNodeTransport,
+                    controller: TransportController,
+                    validator: validateTransport,
+                    onSaved: (String val) {
+                      Transport = val;
+                    },
+                    decoration: new InputDecoration(
+                      border: new OutlineInputBorder(),
+                      hintText: 'Enter Transport',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
+                      //helperText: 'Keep it short, this is just a demo.',
+                      labelText: 'Transport',labelStyle:
+                    new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
+                      prefixIcon: const Icon(FontAwesomeIcons.truck,  color:Color(0xFFCEA910),),
+                      prefixText: ' ',
+                      //suffixText: 'USD',
+                      //suffixStyle: const TextStyle(color: Colors.green)
+                      ),
+                    ),
+
+                  ),
+//------------------------------------------------------------------------------------------------//
+                Visibility(
+                  visible: _visibleStoreBtn,
+                  child:   new TextFormField(
+                    focusNode: myFocusNodeLocation,
+                    controller: LocationController,
+                    validator: validateLocation,
+                    onSaved: (String val) {
+                      Transport = val;
+                    },
+                    decoration: new InputDecoration(
+                      border: new OutlineInputBorder(),
+                      hintText: 'Enter Location',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
+                      //helperText: 'Keep it short, this is just a demo.',
+                      labelText: 'Location',labelStyle:
+                    new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
+                      prefixIcon: const Icon(FontAwesomeIcons.locationArrow,  color:Color(0xFFCEA910),),
+                      prefixText: ' ',
+                      //suffixText: 'USD',
+                      //suffixStyle: const TextStyle(color: Colors.green)
+                      ),
+                    ),
+
+                  ),
+//-----------------------------------------------------------------------------------------------------------------//
               ],
               ),
             ),
@@ -551,19 +781,20 @@ class _NewPostScreenState extends State<NewPostScreen>{
         ],
         );
     }
-    //--------------------------------------------------------------------------------------------------------------------------------//
+//--------------------------------------------------------------------------------------------------------------------------------//
     Widget FormBtnCancelSave() {
       return  FadeAnimation(2, Container(
           margin: EdgeInsets.only(left: 20.0,right: 20.0),
           child: Row(children: <Widget>[
             Expanded(
-              child: RaisedButton(
-                color: Color(0xFFCEA910),
-                child:  Text(
-                  GlobalStringText.Post.toUpperCase(),
-                  style: TextStyle(color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold,fontSize: _large? 14: (_medium? 12: 10)),
-                  ),
-                onPressed: () {
+              child: new FlatButton.icon(
+                shape: new RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(18.0),
+                    side: BorderSide(color: ColorCode.AppColorCode)),
+                color: ColorCode.AppColorCode,
+                icon: Icon(FontAwesomeIcons.solidPaperPlane,color: Colors.white,size: 18.0,), //`Icon` to display
+                label: Text(GlobalStringText.Post.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
+                onPressed: (){
                   _sendToServer();
                 },
                 ),
@@ -574,14 +805,17 @@ class _NewPostScreenState extends State<NewPostScreen>{
               width: 2.0,
               ),
             Expanded(
-              child: RaisedButton(
-                color: Color(0xFFCEA910),
-                child:  Text(
-                  GlobalStringText.Cancle.toUpperCase(),
-                  style: TextStyle(color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold,fontSize: _large? 14: (_medium? 12: 10)),
-                  ),
-                onPressed: () {
-                  // _sendToServer();
+              child: new FlatButton.icon(
+                shape: new RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.grey)),
+                color: Colors.grey,
+                //color: Colors.red,
+                icon: Icon(FontAwesomeIcons.windowClose,color: Colors.white,size: 18.0,), //`Icon` to display
+                label: Text(GlobalStringText.Cancle.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
+                //onPressed: _sendToServer(context),
+                onPressed: (){
+                  // _sendToServer(context);
                 },
                 ),
               ),
@@ -630,8 +864,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                new Text("Mr. "+
-                                             ReciveUserFullName,
+                                new Text("Mr."+ReciveUserFullName.toString(),
                                            style: TextStyle(
                                                fontSize: 12.0,
                                                color: Colors.white,
@@ -641,8 +874,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                                          ),
                                 new Padding(
                                   padding: const EdgeInsets.only(top: 0.0),
-                                  child: new Text(
-                                    ReciveUserEmail,
+                                  child: new Text(ReciveUserEmail.toString(),
                                     style: TextStyle(
                                         fontSize: 12.0,
                                         color: Colors.white,
@@ -886,43 +1118,6 @@ class _NewPostScreenState extends State<NewPostScreen>{
         ),
       );
   }
-//------------------------------------------AlertDilog------------------------------------//
-  Future<void> _StatusFalseAlert(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(GlobalStringText.SomethingWentWrong, textAlign: TextAlign.center,
-                        style: new TextStyle(fontSize: 15.0,
-                                                 color: ColorCode.AppColorCode,
-                                                 fontWeight: FontWeight.bold),),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(GlobalStringText.DataNotAvilable.toString(),
-                       textAlign: TextAlign.center,
-                       style: new TextStyle(fontSize: 12.0,
-                                                color: ColorCode.AppColorCode,
-                                                fontWeight: FontWeight.bold),),
-              ],
-              ),
-            ),
-          actions: <Widget>[
-            FlatButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(GlobalStringText.TryAgain, style: new TextStyle(fontSize: 15.0,
-                                                                              color: ColorCode.AppColorCode,
-                                                                              fontWeight: FontWeight
-                                                                                  .bold),),
-              ),
-          ],
-          );
-      },
-      );
-  }
   //----------------------------------------------------------------------------------------------------------//
   void _checkInternetConnectivity(BuildContext context) async {
     var result = await Connectivity().checkConnectivity();
@@ -1031,9 +1226,9 @@ class _NewPostScreenState extends State<NewPostScreen>{
     String patttern = r'';
     RegExp regExp = new RegExp(patttern);
     if (value.length == 0) {
-      return "Quantity is Required";
+      return "Transport is Required";
     } else if (!regExp.hasMatch(value)) {
-      return "Quantity must be Need";
+      return "Transport must be Need";
     }
     return null;
   }
@@ -1081,7 +1276,7 @@ class Company {
 
   static List<Company> getCompanies() {
     return <Company>[
-      Company(1, 'Select Type'),
+      Company(1, 'SELECT TYPE',),
       Company(2, 'Flower'),
       Company(3, 'Seed'),
       Company(4, 'Fruit'),
@@ -1098,7 +1293,7 @@ class ColorsParent {
 
   static List<ColorsParent> getColors() {
     return <ColorsParent>[
-      ColorsParent(1, 'Select Color'),
+      ColorsParent(1, 'SELECT COLOR'),
       ColorsParent(2, '0-10'),
       ColorsParent(3, '10-20'),
       ColorsParent(4, '20-30'),

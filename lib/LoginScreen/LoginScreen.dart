@@ -308,6 +308,7 @@ class LoginScreenState extends State<LoginScreen> {
         return;
       }
       LoginModel loginModel = LoginModel.fromJson(data);
+      _displaySnackbar(context);
       _success(loginModel);
 
     }).catchError((error) {
