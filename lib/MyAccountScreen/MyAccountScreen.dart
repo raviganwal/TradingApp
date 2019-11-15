@@ -100,6 +100,11 @@ class MyAccountScreenState extends State<MyAccountScreen> {
           ReciveDataUserStatus = data[0]["Status"];
           ReciveDataUserFullName = data[0]["First_Name"]+" "+data[0]["Last_Name"];
         });
+        setState(() {
+          ProfileFirstNameController.text = ReciveDataUserFirstName;
+          ProfileLastNameController.text = ReciveDataUserLastName;
+          ProfileMobileNumberController.text = ReciveDataUserMobile;
+        });
       }
 //------------------------------------------------------------------------------------------------------------//
     }).catchError((error) {
@@ -241,9 +246,6 @@ class MyAccountScreenState extends State<MyAccountScreen> {
   void initState() {
     super.initState();
     this.GetProfileData();
-    setState(() {
-      ProfileFirstNameController.text = ReciveDataUserFirstName;
-    });
 
   }
 //----------------------------------------------------------------------------------------------//
