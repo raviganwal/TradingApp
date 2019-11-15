@@ -282,7 +282,20 @@ class _NewPostScreenState extends State<NewPostScreen>{
       print("resultbody" + resultPostAdd.body);
 //------------------------------------------------------------------------------------------------------------//
       setStatus(resultPostAdd.statusCode == 200 ? resultPostAdd.body : errMessage);
-      print("jsonresp ${resultPostAdd.body}");
+      //print("jsonresp ${resultPostAdd.body}");
+
+      TitleController.clear();
+      PriceController.clear();
+      QuantityController.clear();
+      TitleController.clear();
+      DescriptionController.clear();
+      LocationController.clear();
+      TransportController.clear();
+       _isCheckedCase = false;
+       _isCheckedHalfCase = false;
+       _isCheckedOnline = false;
+       _isCheckedDispatch = false;
+       _isCheckedStore = false;
 
 
       data = json.decode(resultPostAdd.body);
@@ -333,7 +346,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
             FlatButton(
               onPressed: () {
                 _scaffoldKey.currentState.hideCurrentSnackBar();
-                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed(HomeScreen.tag);
               },
               child: Text(GlobalStringText.TryAgain, style: new TextStyle(fontSize: 15.0,
                                                                               color: ColorCode.AppColorCode,
@@ -352,7 +365,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(GlobalStringText.SomethingWentWrong, textAlign: TextAlign.center,
+          title: Text(GlobalStringText.Thanks, textAlign: TextAlign.center,
                         style: new TextStyle(fontSize: 15.0,
                                                  color: ColorCode.AppColorCode,
                                                  fontWeight: FontWeight.bold),),
@@ -373,7 +386,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
                 _scaffoldKey.currentState.hideCurrentSnackBar();
                 Navigator.of(context).pop();
               },
-              child: Text(GlobalStringText.TryAgain, style: new TextStyle(fontSize: 15.0,
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
                                                                               color: ColorCode.AppColorCode,
                                                                               fontWeight: FontWeight
                                                                                   .bold),),

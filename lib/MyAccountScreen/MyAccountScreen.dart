@@ -11,6 +11,10 @@ import 'package:tradingapp/LoginScreen/FadeAnimation.dart';
 import 'package:tradingapp/LoginScreen/LoginScreen.dart';
 import 'package:tradingapp/LoginScreen/responsive_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tradingapp/Model/ProfileViewModel.dart';
+import 'package:tradingapp/Preferences/Preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity/connectivity.dart';
 //----------------------------------------------------------------------------------------------//
 class MyAccountScreen extends StatefulWidget {
   static String tag = GlobalStringText.tagMyAccountScreen;
@@ -25,28 +29,222 @@ class MyAccountScreenState extends State<MyAccountScreen> {
   bool _large;
   bool _medium;
   ScrollController _scrollController = new ScrollController();
-  TextEditingController SignupFirstNameController = new TextEditingController();
-  TextEditingController SignupLastNameController = new TextEditingController();
-  TextEditingController SignupMobileNumberController = new TextEditingController();
-  TextEditingController SignupEmailController = new TextEditingController();
-  TextEditingController SignupPasswordController = new TextEditingController();
+
+  TextEditingController ProfileFirstNameController = new TextEditingController();
+  TextEditingController ProfileLastNameController = new TextEditingController();
+  TextEditingController ProfileMobileNumberController = new TextEditingController();
+  /*TextEditingController ProfileEmailController = new TextEditingController();*/
+  TextEditingController ProfileStatusController = new TextEditingController();
+
   final FocusNode myFocusNodeFirstName = FocusNode();
   final FocusNode myFocusNodeLastName = FocusNode();
   final FocusNode myFocusNodeMobileNumber = FocusNode();
-  final FocusNode myFocusNodeEmail = FocusNode();
-  final FocusNode myFocusNodePassword = FocusNode();
-  GlobalKey<FormState> _key = new GlobalKey();
-  bool _validate = false;
-  String FirstName, LastName,MobileNumber,Email,Password, ConfirmPassword;
+  /*final FocusNode myFocusNodeEmail = FocusNode();*/
+  final FocusNode myFocusNodeStatus = FocusNode();
   var loading = true;
   String status = '';
   String errMessage = GlobalStringText.errMessage;
   var data;
+  var dataProfileUpdate;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  var ReciveUserID="";
+  var ReciveUserEmail="";
+  var ReciveUserFullName="";
+  List<JSONDATA> _listProfileView = [];
+
+  var ReciveDataUserFirstName = "";
+  var ReciveDataUserLastName = "";
+  var ReciveDataUserEmail = "";
+  var ReciveDataUserMobile = "";
+  var ReciveDataUserStatus ="";
+  var ReciveDataUserFullName ="";
+
+  GlobalKey<FormState> _key = new GlobalKey();
+  bool _validate = false;
+  String FirstName,LastName,Mobile;
+
+//---------------------------------------------------------------------------------------------------//
+  String GetProfileDataurl ='http://192.168.0.200/anuj/ATMA/MyProfile.php';
+  GetProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    ReciveUserID = prefs.getString(Preferences.KEY_UserID).toString();
+    ReciveUserEmail = prefs.getString(Preferences.KEY_Email).toString();
+    ReciveUserFullName = prefs.getString(Preferences.KEY_FullName).toString();
+    http.post(GetProfileDataurl, body: {
+      "User_ID": ReciveUserID.toString(),
+      "Token": GlobalStringText.Token
+    }).then((resultGetProfileData) {
+      print("User_ID"+ReciveUserID.toString());
+      print("Token" + GlobalStringText.Token);
+      print("statusCode" + resultGetProfileData.statusCode.toString());
+      //print("resultbody" + resultGetProfileData.body);
+
+//------------------------------------------------------------------------------------------------------------//
+      setStatus(resultGetProfileData.statusCode == 200 ? resultGetProfileData.body : errMessage);
+      //print("jsonresp ${resultGetProfileData.body}");
+      data = json.decode(resultGetProfileData.body);
+      if(!data['Status']) {
+        _StatusFalseAlert(context);
+        loading = false;
+        return;
+      }
+      else{
+        final ExtractData = jsonDecode(resultGetProfileData.body);
+        data = ExtractData["JSONDATA"];
+        print(data.toString());
+        setState(() {
+          ReciveDataUserFirstName = data[0]["First_Name"];
+          ReciveDataUserLastName = data[0]["Last_Name"];
+          ReciveDataUserEmail = data[0]["Email"];
+          ReciveDataUserMobile = data[0]["Mobile"];
+          ReciveDataUserStatus = data[0]["Status"];
+          ReciveDataUserFullName = data[0]["First_Name"]+" "+data[0]["Last_Name"];
+        });
+      }
+//------------------------------------------------------------------------------------------------------------//
+    }).catchError((error) {
+      setStatus(error);
+    });
+  }
+//---------------------------------------------------------------------------------------------------//
+  setStatus(String message) {
+    setState(() {
+      status = message;
+    });
+  }
+
+//-------------------------------------------UpdateProfileDataurl--------------------------------------------------------//
+  String UpdateProfileDataurl ='http://192.168.0.200/anuj/ATMA/ProfileUpdate.php';
+  UpdateProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    ReciveUserID = prefs.getString(Preferences.KEY_UserID).toString();
+    ReciveUserEmail = prefs.getString(Preferences.KEY_Email).toString();
+    ReciveUserFullName = prefs.getString(Preferences.KEY_FullName).toString();
+    http.post(UpdateProfileDataurl, body: {
+      "User_ID": ReciveUserID.toString(),
+      "Token": GlobalStringText.Token,
+      "FirstName": ProfileFirstNameController.text.toString(),
+      "LastName": ProfileLastNameController.text.toString(),
+      "Mobile": ProfileMobileNumberController.text.toString(),
+    }).then((resultUpdateProfileData) {
+      print("User_ID"+ReciveUserID.toString());
+      print("Token" + GlobalStringText.Token);
+      print("FirstName" + ProfileFirstNameController.text.toString());
+      print("LastName" + ProfileLastNameController.text.toString());
+      print("Mobile" + ProfileMobileNumberController.text.toString());
+      print("statusCode" + resultUpdateProfileData.statusCode.toString());
+      print("resultbody" + resultUpdateProfileData.body);
+
+//------------------------------------------------------------------------------------------------------------//
+      setStatus(resultUpdateProfileData.statusCode == 200 ? resultUpdateProfileData.body : errMessage);
+      //print("jsonresp ${resultGetProfileData.body}");
+      dataProfileUpdate = json.decode(resultUpdateProfileData.body);
+      if(!dataProfileUpdate['status']==true) {
+        _displaySnackbar(context);
+        _StatusTrueAlert();
+        return;
+      }else if (!dataProfileUpdate['status']==false){
+        _displaySnackbar(context);
+        _StatusFalseMessage();
+      }
+//------------------------------------------------------------------------------------------------------------//
+    }).catchError((error) {
+      setStatus(error);
+    });
+  }
+//----------------------------------------------------------------------------------------------//
+  void  _displaySnackbar(BuildContext context) {
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      duration: Duration(seconds: 1),
+      content: Text(GlobalStringText.PleaseWait,style: TextStyle(color: ColorCode.WhiteTextColorCode),),
+      backgroundColor: ColorCode.AppColorCode,
+      ));
+  }
+//-----------------------------------------------------------------------------------------------//
+  Future<void> _StatusTrueAlert() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(GlobalStringText.Warning, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(dataProfileUpdate['MSG'].toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.AppColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                _scaffoldKey.currentState.hideCurrentSnackBar();
+                Navigator.pop(context, true);
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                              color: ColorCode.AppColorCode,
+                                                                              fontWeight: FontWeight
+                                                                                  .bold),),
+              ),
+          ],
+          );
+      },
+      );
+  }
+//-----------------------------------------------------------------------------------------------//
+  Future<void> _StatusFalseMessage() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(GlobalStringText.Thanks, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(dataProfileUpdate['MSG'].toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.AppColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                _scaffoldKey.currentState.hideCurrentSnackBar();
+                Navigator.pop(context, true);
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                              color: ColorCode.AppColorCode,
+                                                                              fontWeight: FontWeight
+                                                                                  .bold),),
+              ),
+          ],
+          );
+      },
+      );
+  }
 //----------------------------------------------------------------------------------------------//
   @override
   void initState() {
     super.initState();
+    this.GetProfileData();
+    setState(() {
+      ProfileFirstNameController.text = ReciveDataUserFirstName;
+    });
+
   }
 //----------------------------------------------------------------------------------------------//
   @override
@@ -92,8 +290,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              new Text("Mr. "+
-                                           "",
+                              new Text("Mr."+ReciveDataUserFullName,
                                          style: TextStyle(
                                              fontSize: 12.0,
                                              color: Colors.white,
@@ -104,7 +301,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
                               new Padding(
                                 padding: const EdgeInsets.only(top: 0.0),
                                 child: new Text(
-                                  "",
+                                  ReciveDataUserEmail,
                                   style: TextStyle(
                                       fontSize: 12.0,
                                       color: Colors.white,
@@ -336,12 +533,11 @@ class MyAccountScreenState extends State<MyAccountScreen> {
             autovalidate: _validate,
             child: Column(
               children: <Widget>[
-                ProfileImagetab,
+                FormProfileImagetab(),
                 SizedBox(height: 15.0,),
                 FormTextField(),
                 SizedBox(height: 15.0,),
                 FormBtnSubmit(),
-                SizedBox(height: 20.0,),
               ],
               ),
             ),
@@ -350,40 +546,43 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       );
   }
 //----------------------------------------------------------------------------------------------//
-  final ProfileImagetab = new  Container(
-    height: 120,
-    color: ColorCode.AppColorCode,
-    padding: EdgeInsets.only(top: 30.0),
-    child: new Stack(fit: StackFit.loose, children: <Widget>[
-      SizedBox(
-        // height: 210,
-        child: Column(
-          children: [
-            ListTile(
-              title: Text("dd".toUpperCase().toString(),style: TextStyle(fontSize: 13.0, color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold)),
-              leading: new Container(
-                  height: 100.0,
-                  width: 100.0,
-                  /*decoration: new BoxDecoration(
+  Widget FormProfileImagetab() {
+    return new  FadeAnimation(2, Container(
+      height: 120,
+      color: ColorCode.AppColorCode,
+      padding: EdgeInsets.only(top: 30.0),
+      child: new Stack(fit: StackFit.loose, children: <Widget>[
+        SizedBox(
+          // height: 210,
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(ReciveDataUserFullName.toUpperCase().toString(),style: TextStyle(fontSize: 13.0, color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold)),
+                leading: new Container(
+                    height: 100.0,
+                    width: 100.0,
+                    /*decoration: new BoxDecoration(
                                      //color: const Color(0xff7c94b6),
                                      borderRadius: BorderRadius.all(const Radius.circular(00.0)),
                                      border: Border.all(color: const Color(0xFF28324E)),
                                      ),*/
-                  child: new Image.network("http://192.168.0.200/anuj/ATMA/images/noimage.jpg")
-                  ),
-              subtitle: Text(GlobalStringText.Edit.toUpperCase().toString(),style: TextStyle(fontSize: 13.0, color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold, decoration: TextDecoration.underline,)),
-              onTap: () {
-                print("d");
-                //Navigator.of(context).pushNamed(ProfileUpdate.tag);
-                // do something
-              },
-              ),
-          ],
+                    child: new Image.network("http://192.168.0.200/anuj/ATMA/images/noimage.jpg")
+                    ),
+                //subtitle: Text(GlobalStringText.Edit.toUpperCase().toString(),style: TextStyle(fontSize: 13.0, color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold, decoration: TextDecoration.underline,)),
+                onTap: () {
+                  print("d");
+                  //Navigator.of(context).pushNamed(ProfileUpdate.tag);
+                  // do something
+                },
+                ),
+            ],
 
+            ),
           ),
-        ),
-    ]),
-    );
+      ]),
+      ),
+                              );
+  }
 //------------------------------------------------------------------------------------------------------------//
   Widget FormTextField() {
     return new Column(
@@ -399,130 +598,82 @@ class MyAccountScreenState extends State<MyAccountScreen> {
                 ),
 //------------------------------------------------------------------------------------------------------------//
               new TextFormField(
-                focusNode: myFocusNodeFirstName,
-                controller: SignupFirstNameController,
+                readOnly: false,
+                controller: ProfileFirstNameController,
                 validator: validateFirstName,
                 onSaved: (String val) {
                   FirstName = val;
                 },
+                focusNode: myFocusNodeFirstName,
                 decoration: new InputDecoration(
                   border: new OutlineInputBorder(),
-                  hintText: 'Enter First Name',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'First Name',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
+                  suffixText: ReciveDataUserFirstName,
+                  suffixStyle:TextStyle(fontSize: 12.0, color:ColorCode.AppColorCode),
+                  hintText: ReciveDataUserFirstName.toString(),
+                  filled: true,
+                  hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
                   prefixIcon: const Icon(Icons.person,  color:Color(0xFFCEA910),),
-                  prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
                   ),
                 ),
               SizedBox(height: 10.0),
 //------------------------------------------------------------------------------------------------------------//
-              TextFormField(
-                focusNode: myFocusNodeLastName,
-                controller: SignupLastNameController,
+              new TextFormField(
+                readOnly: false,
+                controller: ProfileLastNameController,
                 validator: validateLastName,
                 onSaved: (String val) {
                   LastName = val;
                 },
+                focusNode: myFocusNodeLastName,
                 decoration: new InputDecoration(
                   border: new OutlineInputBorder(),
-                  hintText: 'Enter Last Name',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'Last Name',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                  prefixIcon: const Icon(Icons.person, color:Color(0xFFCEA910),),
+                  suffixText: ReciveDataUserLastName,
+                  suffixStyle:TextStyle(fontSize: 12.0, color:ColorCode.AppColorCode),
+                  hintText: ReciveDataUserLastName.toString(),
+                  filled: true,
+                  hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
+                  prefixIcon: const Icon(Icons.person,  color:Color(0xFFCEA910),),
                   prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
                   ),
                 ),
               SizedBox(height: 10.0),
 //------------------------------------------------------------------------------------------------------------//
               new TextFormField(
-                focusNode: myFocusNodeMobileNumber,
-                controller: SignupMobileNumberController,
-                keyboardType: TextInputType.phone,
+                readOnly: false,
+                controller: ProfileMobileNumberController,
                 validator: validateMobile,
                 onSaved: (String val) {
-                  MobileNumber = val;
+                  Mobile = val;
                 },
+                focusNode: myFocusNodeMobileNumber,
+                keyboardType:TextInputType.numberWithOptions(),
                 decoration: new InputDecoration(
                   border: new OutlineInputBorder(),
-                  hintText: 'Enter Mobile Number',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'Mobile Number',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
+                  suffixText: ReciveDataUserMobile,
+                  suffixStyle:TextStyle(fontSize: 12.0, color:ColorCode.AppColorCode),
+                  hintText: ReciveDataUserMobile.toString(),
+                  filled: true,
+                  hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
                   prefixIcon: const Icon(Icons.phone_android,  color:Color(0xFFCEA910),),
                   prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
                   ),
                 ),
               SizedBox(height: 10.0),
 //------------------------------------------------------------------------------------------------------------//
               new TextFormField(
-                focusNode: myFocusNodeEmail,
-                controller: SignupEmailController,
-                validator: validateEmail,
-                onSaved: (String val) {
-                  Email = val;
-                },
+                readOnly: true,
+                keyboardType:TextInputType.numberWithOptions(),
                 decoration: new InputDecoration(
                   border: new OutlineInputBorder(),
-                  hintText: 'Enter Email',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'Email Address',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                  prefixIcon: const Icon(Icons.email,  color:Color(0xFFCEA910),),
+                  suffixText: ReciveDataUserStatus,
+                  suffixStyle:TextStyle(fontSize: 12.0, color:ColorCode.AppColorCode),
+                  hintText: ReciveDataUserStatus.toString(),
+                  filled: true,
+                  hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
+                  prefixIcon: const Icon(FontAwesomeIcons.ban,  color:Color(0xFFCEA910),),
                   prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
                   ),
                 ),
-              SizedBox(height: 10.0),
-//------------------------------------------------------------------------------------------------------------//
-/*              new TextFormField(
-                autocorrect: false,
-                obscureText: true,
-                focusNode: myFocusNodePassword,
-                controller: SignupPasswordController,
-                validator: (value) =>
-                value.isEmpty ? "Password can't be empty" : null,
-                onSaved: (val) => Password = val,
-                decoration: new InputDecoration(
-                  border: new OutlineInputBorder(),
-                  hintText: 'Enter Password',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'Password',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                  prefixIcon: const Icon(Icons.lock,  color:Color(0xFFCEA910),),
-                  prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
-                  ),
-                ),*/
-/*//------------------------------------------------------------------------------------------------------------//
-
-              TextFormField(
-                autocorrect: false,
-                obscureText: true,
-                validator: (value) =>
-                value.isEmpty ? "Password can't be empty" : null,
-                onSaved: (val) => ConfirmPassword = val,
-                decoration: new InputDecoration(
-                  border: new OutlineInputBorder(),
-                  hintText: 'Enter Confirm Password',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'Confirm Password',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                  prefixIcon: const Icon(Icons.lock, color:Color(0xFFCEA910),),
-                  prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
-                  ),
-                ),*/
             ],
             ),
           ),
@@ -530,7 +681,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       ],
       );
   }
-//--------------------------------------------------------------------------------------------------------------------------------//
+  //--------------------------------------------------------------------------------------------------------------------------------//
   Widget FormBtnSubmit() {
     return  FadeAnimation(2, Container(
         margin: EdgeInsets.only(left: 20.0,right: 20.0),
@@ -545,11 +696,10 @@ class MyAccountScreenState extends State<MyAccountScreen> {
                 color: ColorCode.AppColorCode,
                 //color: Colors.red,
                 icon: Icon(FontAwesomeIcons.fileExport,color: Colors.white,), //`Icon` to display
-                  label: Text(GlobalStringText.ProfileSubmit.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
-                  //onPressed: _sendToServer(context),
-                  onPressed: (){
-                   // _sendToServer(context);
-                  },
+                label: Text(GlobalStringText.ProfileSubmit.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
+                onPressed: (){
+                  _sendToServer(context);
+                },
                 ),
               ),
             ),
@@ -562,92 +712,13 @@ class MyAccountScreenState extends State<MyAccountScreen> {
         ),
                           );
   }
-//-----------------------------------------------------------------------------------------------------------------------------------------//
-  String validateFirstName(String value) {
-    String patttern = r'(^[a-zA-Z ]*$)';
-    RegExp regExp = new RegExp(patttern);
-    if (value.length == 0) {
-      return "First Name is Required";
-    } else if (!regExp.hasMatch(value)) {
-      return "Name must be a-z and A-Z";
-    }
-    return null;
-  }
-  String validateLastName(String value) {
-    String patttern = r'(^[a-zA-Z ]*$)';
-    RegExp regExp = new RegExp(patttern);
-    if (value.length == 0) {
-      return "Last Name is Required";
-    } else if (!regExp.hasMatch(value)) {
-      return "Name must be a-z and A-Z";
-    }
-    return null;
-  }
-  String validateMobile(String value) {
-    String patttern = r'(^[0-9]*$)';
-    RegExp regExp = new RegExp(patttern);
-    if (value.length == 0) {
-      return "Mobile is Required";
-    } else if(value.length != 10){
-      return "Mobile number must 10 digits";
-    }else if (!regExp.hasMatch(value)) {
-      return "Mobile Number must be digits";
-    }
-    return null;
-  }
-  String validateEmail(String value) {
-    String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regExp = new RegExp(pattern);
-    if (value.length == 0) {
-      return "Email is Required";
-    } else if(!regExp.hasMatch(value)){
-      return "Invalid Email";
-    }else {
-      return null;
-    }
-  }
-  //---------------------------------------------------------------------------------------------------//
-  String Signupurl ='http://192.168.0.200/anuj/ATMA/Registration.php';
-  PostSignupData() {
-    http.post(Signupurl, body: {
-      "FirstName": SignupFirstNameController.text.toString(),
-      "LastName": SignupLastNameController.text.toString(),
-      "Email": SignupEmailController.text.toString(),
-      "Mobile": SignupMobileNumberController.text.toString(),
-      "Password": SignupPasswordController.text.toString(),
-      "Token": GlobalStringText.Token
-    }).then((resultSignup) {
-
-//------------------------------------------------------------------------------------------------------------//
-      setStatus(resultSignup.statusCode == 200 ? resultSignup.body : errMessage);
-//------------------------------------------------------------------------------------------------------------//
-      data = json.decode(resultSignup.body);
-      if(!data['Status']==true) {
-        _displaySnackbar(context);
-        TrueAlert(context);
-        return;
-      }else if (!data['Status']==false){
-        _displaySnackbar(context);
-        _StatusFalseAlert(context);
-      }
-//------------------------------------------------------------------------------------------------------------//
-    }).catchError((error) {
-      setStatus(error);
-    });
-  }
-//---------------------------------------------------------------------------------------------------//
-  setStatus(String message) {
-    setState(() {
-      status = message;
-    });
-  }
   //-------------------------------------------------------------------------------------------------------------------//
-  _sendToServer() async {
+  _sendToServer(BuildContext context) async {
     if (_key.currentState.validate()) {
       // No any error in validation
       _key.currentState.save();
       print("true");
-      PostSignupData();
+      UpdateProfileData();
     } else {
       // validation error
       setState(() {
@@ -738,15 +809,6 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       },
       );
   }
-
-//----------------------------------------------------------------------------------------------//
-  void  _displaySnackbar(BuildContext context) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      duration: Duration(seconds: 1),
-      content: Text(GlobalStringText.PleaseWait,style: TextStyle(color: ColorCode.WhiteTextColorCode),),
-      backgroundColor: ColorCode.AppColorCode,
-      ));
-  }
   //---------------------------------------------------------------------------------------------------//
   void TapMessage(BuildContext context, String message) {
     var alert = new AlertDialog(
@@ -767,6 +829,41 @@ class MyAccountScreenState extends State<MyAccountScreen> {
     /*final prefs = await SharedPreferences.getInstance();
     prefs.remove(Preferences.KEY_UserStatus);
     Navigator.of(context).pushNamed(SplashScreen.tag);*/
+  }
+  //---------------------------------------------------------------------------------------------//
+  String validateFirstName(String value) {
+    String patttern = r'(^[a-zA-Z ]*$)';
+    RegExp regExp = new RegExp(patttern);
+    if (value.length == 0) {
+      return "First Name is Required";
+    } else if (!regExp.hasMatch(value)) {
+      return "Name must be a-z and A-Z";
+    }
+    return null;
+  }
+  //----------------------------------------------------------------------------------------------------------------------//
+  String validateLastName(String value) {
+    String patttern = r'(^[a-zA-Z ]*$)';
+    RegExp regExp = new RegExp(patttern);
+    if (value.length == 0) {
+      return "Last Name is Required";
+    } else if (!regExp.hasMatch(value)) {
+      return "Name must be a-z and A-Z";
+    }
+    return null;
+  }
+  //----------------------------------------------------------------------------------------------------------------------//
+  String validateMobile(String value) {
+    String patttern = r'(^[0-9]*$)';
+    RegExp regExp = new RegExp(patttern);
+    if (value.length == 0) {
+      return "Mobile is Required";
+    } else if(value.length != 10){
+      return "Mobile number must 10 digits";
+    }else if (!regExp.hasMatch(value)) {
+      return "Mobile Number must be digits";
+    }
+    return null;
   }
 }
 //----------------------------------------------------------------------------------------------//

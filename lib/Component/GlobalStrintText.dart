@@ -37,12 +37,14 @@ class GlobalStringText {
   static String Cancle = 'Cancle';
   static String PleaseWait = 'Please Wait........!';
   static String Type = 'Type';
+  static String Quantity = 'Quantity';
+  static String ColorPercentage = 'Color Percentage';
   static String  PaymentMode= 'Payment Mode';
   static String  Colorpercentage= 'Color percentage';
   static String Transport = 'Transport';
   static String Location = 'Location';
   static String Edit = 'Update Profile';
-  static String ProfileSubmit = 'Submit';
+  static String ProfileSubmit = 'Update';
   static String Dispatch = 'Dispatch';
   static String Store = 'Store';
   static String Token="387**jheie8KKh9&ihHgw8whjsysgJywihLwiw829u2jkjdy3987&^&^lksjlkw83os93kjs9LLK";
@@ -73,4 +75,5 @@ static String ImageMyPost = "assets/images/MyPost.png";
   static String tagChatProposalScreen = "ChatProposalScreen";
   static String tagChatMessage = "ChatMessage";
   static String tagMyPost = "MyPost";
+  static String tagMyPostDetails = "MyPostDetails";
 }

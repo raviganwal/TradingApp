@@ -9,8 +9,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tradingapp/HomeScreen/HomeScreen.dart';
 import 'package:tradingapp/LoginScreen/responsive_ui.dart';
 import 'package:tradingapp/LoginScreen/FadeAnimation.dart';
-import 'package:tradingapp/Model/ProposalModel.dart';
+import 'package:tradingapp/Model/MyPostModel.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:tradingapp/MyPostScreen/MyPostDetails.dart';
 import 'package:tradingapp/ProposalScreen/ProposalScreenDetails.dart';
 import 'package:tradingapp/Preferences/Preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,7 +31,7 @@ class _MyPostState extends State<MyPost>{
   String status = '';
   String errMessage = GlobalStringText.errMessage;
   var data;
-  List<JSONDATA> _listProposal = [];
+  List<JSONDATA> _listMyPost = [];
   String ReciveAdv_ID = '';
   String ReciveTitle = '';
   var ReciveUserID="";
@@ -40,32 +41,38 @@ class _MyPostState extends State<MyPost>{
   @override
   void initState() {
     this._checkInternetConnectivity(context);
-    this.fetchProposal();
+    this.fetchMyPostData();
   }
 //-----------------------------------------------------------------------------------------//
-  String Proposalurl ='http://192.168.0.200/anuj/ATMA/HomePageAdv.php';
-  fetchProposal() async {
+  String MyPostDataurl ='http://192.168.0.200/anuj/ATMA/MyADV.php';
+  fetchMyPostData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     ReciveUserID = prefs.getString(Preferences.KEY_UserID).toString();
     ReciveUserEmail = prefs.getString(Preferences.KEY_Email).toString();
     ReciveUserFullName = prefs.getString(Preferences.KEY_FullName).toString();
-    http.post(Proposalurl, body: {
+    http.post(MyPostDataurl, body: {
       "Token": GlobalStringText.Token,
-    }).then((resultProposal) {
-      setStatus(resultProposal.statusCode == 200 ? resultProposal.body : errMessage);
-      data = json.decode(resultProposal.body);
+      "User_ID": ReciveUserID.toString(),
+    }).then((resultMyPostData) {
+      print("Url"+MyPostDataurl);
+      setStatus(resultMyPostData.statusCode == 200 ? resultMyPostData.body : errMessage);
+      print("jsonresp ${resultMyPostData.body}");
+      loading = false;
+      data = json.decode(resultMyPostData.body);
+
+
       if(!data['Status']) {
         _StatusFalseAlert(context);
         loading = false;
         return;
       }
       else{
-        final ExtractData = jsonDecode(resultProposal.body);
+        final ExtractData = jsonDecode(resultMyPostData.body);
         data = ExtractData["JSONDATA"];
         //print(data.toString());
         setState(() {
           for (Map i in data) {
-            _listProposal.add(JSONDATA.fromJson(i));
+            _listMyPost.add(JSONDATA.fromJson(i));
             loading = false;
           }
         });
@@ -415,11 +422,11 @@ class _MyPostState extends State<MyPost>{
                       ): Expanded(child:
                                   GridView.builder(
                                       padding: const EdgeInsets.symmetric(horizontal: 8).copyWith(top: 0),
-                                      itemCount: _listProposal.length,
+                                      itemCount: _listMyPost.length,
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: 2,),
                                       itemBuilder: (context, i) {
-                                        final ReciveProposalObject = _listProposal[i];
+                                        final ReciveProposalObject = _listMyPost[i];
                                         return new Container(
                                           child: new GestureDetector(
                                             onTap: () {
@@ -431,7 +438,7 @@ class _MyPostState extends State<MyPost>{
                                               });
                                               var route = new MaterialPageRoute(
                                                 builder: (BuildContext context) =>
-                                                new ProposalScreenDetails(
+                                                new MyPostDetails(
                                                     value1: " ${ReciveAdv_ID.toString()}",
                                                     value2: " ${ReciveTitle.toString()}"
                                                     ),

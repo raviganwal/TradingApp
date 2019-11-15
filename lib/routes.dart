@@ -5,6 +5,7 @@ import 'package:tradingapp/HomeScreen/HomeScreen.dart';
 import 'package:tradingapp/LoginScreen/LoginScreen.dart';
 import 'package:tradingapp/MyAccountScreen/MyAccountScreen.dart';
 import 'package:tradingapp/MyPostScreen/MyPost.dart';
+import 'package:tradingapp/MyPostScreen/MyPostDetails.dart';
 import 'package:tradingapp/NewPostScreen/NewPostScreen.dart';
 import 'package:tradingapp/ProposalScreen/ProposalScreen.dart';
 import 'package:tradingapp/ProposalScreen/ProposalScreenDetails.dart';
@@ -26,5 +27,6 @@ final routes = {
   MyAccountScreen.tag: (context) => MyAccountScreen(),
   ChatProposalScreen.tag: (context) => ChatProposalScreen(),
   ChatMessageDetails.tag: (context) => ChatMessageDetails(),
-  MyPost.tag: (context) => MyPost()
+  MyPost.tag: (context) => MyPost(),
+  MyPostDetails.tag: (context) => MyPostDetails()
 };

@@ -39,8 +39,8 @@ class _ProposalScreenState extends State<ProposalScreen>{
 //----------------------------------------------------------------------------------------------//
   @override
   void initState() {
-  this._checkInternetConnectivity(context);
-  this.fetchProposal();
+    this._checkInternetConnectivity(context);
+    this.fetchProposal();
   }
 //-----------------------------------------------------------------------------------------//
   String Proposalurl ='http://192.168.0.200/anuj/ATMA/HomePageAdv.php';
@@ -54,8 +54,6 @@ class _ProposalScreenState extends State<ProposalScreen>{
     }).then((resultProposal) {
       setStatus(resultProposal.statusCode == 200 ? resultProposal.body : errMessage);
       data = json.decode(resultProposal.body);
-      print("jsonresp ${resultProposal.body.toString()}");
-
       if(!data['Status']) {
         _StatusFalseAlert(context);
         loading = false;
@@ -103,7 +101,7 @@ class _ProposalScreenState extends State<ProposalScreen>{
                     fontWeight: FontWeight.bold),
                 ),
               new GestureDetector(
-               /* onTap: () {
+                /* onTap: () {
                   var route = new MaterialPageRoute(
                       builder: (BuildContext context) =>
                       new SeeAllScreen()
@@ -236,7 +234,7 @@ class _ProposalScreenState extends State<ProposalScreen>{
                       new Container(
                         child: new GestureDetector(
                           onTap: () {
-                           Navigator.of(context).pushNamed(HomeScreen.tag);
+                            Navigator.of(context).pushNamed(HomeScreen.tag);
                           },
                           child: new Text(GlobalStringText.proposal.toUpperCase(),
                                               textAlign: TextAlign.center,
@@ -298,7 +296,7 @@ class _ProposalScreenState extends State<ProposalScreen>{
                       new Container(
                         child: new GestureDetector(
                           onTap: () {
-                           // Navigator.of(context).pushNamed(NewPost.tag);
+                            // Navigator.of(context).pushNamed(NewPost.tag);
                           },
                           child: new Text(GlobalStringText.newpost.toUpperCase(),
                                               textAlign: TextAlign.center,
@@ -329,7 +327,7 @@ class _ProposalScreenState extends State<ProposalScreen>{
                       new Container(
                         child: new GestureDetector(
                           onTap: () {
-                           // Navigator.of(context).pushNamed(Account.tag);
+                            // Navigator.of(context).pushNamed(Account.tag);
                           },
                           child: new Text(GlobalStringText.Account.toUpperCase(),
                                               textAlign: TextAlign.center,
@@ -415,16 +413,16 @@ class _ProposalScreenState extends State<ProposalScreen>{
                         ? Center(
                       child: CircularProgressIndicator(backgroundColor: ColorCode.AppColorCode),
                       ): Expanded(child:
-                                      GridView.builder(
+                                  GridView.builder(
                                       padding: const EdgeInsets.symmetric(horizontal: 8).copyWith(top: 0),
                                       itemCount: _listProposal.length,
-                                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,),
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,),
                                       itemBuilder: (context, i) {
-                                         final ReciveProposalObject = _listProposal[i];
+                                        final ReciveProposalObject = _listProposal[i];
                                         return new Container(
                                           child: new GestureDetector(
-                                          onTap: () {
+                                            onTap: () {
                                               setState(() {
                                                 ReciveAdv_ID =ReciveProposalObject.advID.toString(); //if you want to assign the index somewhere to check//if you want to assign the index somewhere to check
                                                 ReciveTitle =ReciveProposalObject.title.toString(); //if you want to assign the index somewhere to check//if you want to assign the index somewhere to check
@@ -440,39 +438,39 @@ class _ProposalScreenState extends State<ProposalScreen>{
                                                 );
                                               Navigator.of(context).push(route);
                                             },
-                                          child: new Card(
-                                            color: ColorCode.ImageBackgroundColorCode,
-                                            margin: new EdgeInsets.only(left: 5.0, right: 8.0, top: 5.0, bottom: 8.0),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                                            elevation: 4.0,
-                                            child: Padding(
-                                              padding:
-                                              EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                  children: <Widget>[
-                                                    Flexible(
-                                                      child: Image.network(
-                                                        "http://192.168.0.200/anuj/ATMA/images/noimage.jpg",
-                                                        width: 150,
-                                                        height: 150,
+                                            child: new Card(
+                                              color: ColorCode.ImageBackgroundColorCode,
+                                              margin: new EdgeInsets.only(left: 5.0, right: 8.0, top: 5.0, bottom: 8.0),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                                              elevation: 4.0,
+                                              child: Padding(
+                                                padding:
+                                                EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0, top: 10.0),
+                                                child: Container(
+                                                  alignment: Alignment.center,
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Flexible(
+                                                        child: Image.network(
+                                                          "http://192.168.0.200/anuj/ATMA/images/noimage.jpg",
+                                                          width: 150,
+                                                          height: 150,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    Padding(
-                                                      padding: EdgeInsets.all(10.0),
-                                                      child: Text(
-                                                        ReciveProposalObject.title.toUpperCase().toString(),style: TextStyle(color: ColorCode.AppColorCode),
-                                                        maxLines: 1,
-                                                        softWrap: true,
-                                                        textAlign: TextAlign.center,
+                                                      Padding(
+                                                        padding: EdgeInsets.all(10.0),
+                                                        child: Text(
+                                                          ReciveProposalObject.title.toUpperCase().toString(),style: TextStyle(color: ColorCode.AppColorCode),
+                                                          maxLines: 1,
+                                                          softWrap: true,
+                                                          textAlign: TextAlign.center,
+                                                          ),
                                                         ),
-                                                      ),
-                                                  ],
+                                                    ],
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
                                               ),
                                             ),
 
@@ -485,8 +483,8 @@ class _ProposalScreenState extends State<ProposalScreen>{
             ],
             ),
           ),
+                                ),
         ),
-      ),
       );
   }
 //------------------------------------------AlertDilog------------------------------------//
@@ -517,9 +515,9 @@ class _ProposalScreenState extends State<ProposalScreen>{
                 Navigator.of(context).pop();
               },
               child: Text(GlobalStringText.TryAgain, style: new TextStyle(fontSize: 15.0,
-                                                                color: ColorCode.AppColorCode,
-                                                                fontWeight: FontWeight
-                                                                    .bold),),
+                                                                              color: ColorCode.AppColorCode,
+                                                                              fontWeight: FontWeight
+                                                                                  .bold),),
               ),
           ],
           );
@@ -565,9 +563,9 @@ class _ProposalScreenState extends State<ProposalScreen>{
                 Navigator.of(context).pop();
               },
               child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
-                                                         color: ColorCode.AppColorCode,
-                                                         fontWeight: FontWeight
-                                                             .bold),),
+                                                                        color: ColorCode.AppColorCode,
+                                                                        fontWeight: FontWeight
+                                                                            .bold),),
               ),
           ],
           );
