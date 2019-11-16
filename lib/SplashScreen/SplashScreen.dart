@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tradingapp/Component/ColorCode.dart';
 import 'package:tradingapp/Component/GlobalStrintText.dart';
 import 'package:tradingapp/HomeScreen/HomeScreen.dart';
+import 'package:tradingapp/LoginScreen/LoginScreen.dart';
 import 'package:tradingapp/WalkThrough/WalkThrough.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tradingapp/Preferences/Preferences.dart';
@@ -29,7 +30,7 @@ class SplashScreenState extends State<SplashScreen>
     } else {
       Navigator
           .of(context)
-          .push(new MaterialPageRoute(builder: (_) => new WalkThrough()));
+          .push(new MaterialPageRoute(builder: (_) => new LoginScreen()));
     }
   }
 //----------------------------------------------------------------------------------------------//

@@ -14,6 +14,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:tradingapp/SignupScreen/SignupScreen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 //----------------------------------------------------------------------------------------------//
 class LoginScreen extends StatefulWidget {
   static String tag = GlobalStringText.tagLoginScreen;
@@ -233,12 +234,13 @@ class LoginScreenState extends State<LoginScreen> {
         margin: EdgeInsets.only(left: 20.0,right: 20.0),
         child: Row(children: <Widget>[
           Expanded(
-            child: RaisedButton(
+            child: new FlatButton.icon(
+              shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(18.0),
+                  side: BorderSide(color: ColorCode.AppColorCode)),
               color: ColorCode.AppColorCode,
-              child:  Text(
-                GlobalStringText.Login,
-                style: TextStyle(color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold,fontSize: _large? 14: (_medium? 12: 10)),
-                ),
+              icon: Icon(FontAwesomeIcons.signOutAlt,color: Colors.white,size: 18.0,), //`Icon` to display
+              label: Text(GlobalStringText.Login.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
               onPressed: () {
                 _sendToServer();
               },
@@ -250,13 +252,14 @@ class LoginScreenState extends State<LoginScreen> {
             width: 1.0,
             ),
           Expanded(
-            child: RaisedButton(
+            child: new FlatButton.icon(
+              shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(18.0),
+                  side: BorderSide(color: ColorCode.AppColorCode)),
               color: ColorCode.AppColorCode,
-              child:  Text(
-                GlobalStringText.Signup,
-                style: TextStyle(color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold,fontSize: _large? 14: (_medium? 12: 10)),
-                ),
-                    onPressed: () => Navigator.of(context).pushNamed(SignupScreen.tag),
+              icon: Icon(FontAwesomeIcons.userPlus,color: Colors.white,size: 18.0,), //`Icon` to display
+              label: Text(GlobalStringText.Signup.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
+              onPressed: () => Navigator.of(context).pushNamed(SignupScreen.tag),
               ),
             ),
         ])
@@ -308,9 +311,8 @@ class LoginScreenState extends State<LoginScreen> {
         return;
       }
       LoginModel loginModel = LoginModel.fromJson(data);
-      _displaySnackbar(context);
       _success(loginModel);
-
+      _displaySnackbar(context);
     }).catchError((error) {
       setStatus(error);
     });

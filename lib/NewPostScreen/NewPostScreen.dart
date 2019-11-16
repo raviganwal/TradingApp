@@ -1179,25 +1179,62 @@ class _NewPostScreenState extends State<NewPostScreen>{
       },
       );
   }
-//---------------------------------------------------------------------------------------------------//
-  void TapMessage(BuildContext context, String message) {
-    var alert = new AlertDialog(
-      title: new Text('Want to logout?'),
-      content: new Text(message),
-      actions: <Widget>[
-        new FlatButton(
-            onPressed: () {
-              removeData(context);
-            },
-            child: new Text('OK'))
-      ],
+  //------------------------------------------AlertDilogTapMessage------------------------------------//
+  Future<void> TapMessage(BuildContext context, String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(message, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(GlobalStringText.LogOut.toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.BlackTextColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.Cancle, style: new TextStyle(fontSize: 15.0,
+                                                                            color: ColorCode.GreenTextColorCode,
+                                                                            fontWeight: FontWeight
+                                                                                .bold),),
+              ),
+            FlatButton(
+              onPressed: () {
+                removeData(context);
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                        color: ColorCode.RedTextColorCode,
+                                                                        fontWeight: FontWeight
+                                                                            .bold),),
+              ),
+
+          ],
+          );
+      },
       );
-    showDialog(context: context, child: alert);
   }
 //---------------------------------------------------------------------------------------------------//
   removeData(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
+    prefs.remove(Preferences.KEY_FullName);
+    prefs.remove(Preferences.KEY_UserID);
+    prefs.remove(Preferences.KEY_Email);
     prefs.remove(Preferences.KEY_UserStatus);
+    prefs.remove(Preferences.KEY_FirstNAME);
+    prefs.remove(Preferences.KEY_LastNAME);
     Navigator.of(context).pushNamed(SplashScreen.tag);
   }
 //-----------------------------------------------------------------------------------------------------------------------------------------//
@@ -1271,6 +1308,7 @@ class _NewPostScreenState extends State<NewPostScreen>{
   _sendToServer() {
     if (_key.currentState.validate()) {
       _key.currentState.save();
+      _checkInternetConnectivity(context);
       PostAdd();
     } else {
       // validation error

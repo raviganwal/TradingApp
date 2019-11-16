@@ -10,6 +10,7 @@ import 'package:tradingapp/LoginScreen/FadeAnimation.dart';
 import 'package:tradingapp/LoginScreen/LoginScreen.dart';
 import 'package:tradingapp/LoginScreen/responsive_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:dropdownfield/dropdownfield.dart';
 //----------------------------------------------------------------------------------------------//
 class SignupScreen extends StatefulWidget {
   static String tag = GlobalStringText.tagSignupScreen;
@@ -43,9 +44,36 @@ class SignupScreenState extends State<SignupScreen> {
   var data;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 //----------------------------------------------------------------------------------------------//
+  List<Company> _companies = Company.getCompanies();
+  List<DropdownMenuItem<Company>> _dropdownMenuItems;
+  Company _selectedCompany;
+  String GetDropDownValue = "";
+  List<DropdownMenuItem<Company>> buildDropdownMenuItems(List companies) {
+    List<DropdownMenuItem<Company>> items = List();
+    for (Company company in companies) {
+      items.add(
+        DropdownMenuItem(
+          value: company,
+          child: Text(company.name),
+          ),
+        );
+    }
+    return items;
+  }
+  onChangeDropdownItem(Company selectedCompany) {
+    setState(() {
+      _selectedCompany = selectedCompany;
+      //GetDropDownValue =_selectedCompany.toString();
+      print(_selectedCompany.name.toString());
+    });
+  }
+//----
+//----------------------------------------------------------------------------------------------//
   @override
   void initState() {
     super.initState();
+    _dropdownMenuItems = buildDropdownMenuItems(_companies);
+    _selectedCompany = _dropdownMenuItems[0].value;
   }
 //----------------------------------------------------------------------------------------------//
   @override
@@ -55,8 +83,7 @@ class SignupScreenState extends State<SignupScreen> {
     _pixelRatio = MediaQuery.of(context).devicePixelRatio;
     _large =  ResponsiveWidget.isScreenLarge(_width, _pixelRatio);
     _medium =  ResponsiveWidget.isScreenMedium(_width, _pixelRatio);
-
-//-----------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
     return  Scaffold(
       key: _scaffoldKey,
         body: new Container(
@@ -72,9 +99,7 @@ class SignupScreenState extends State<SignupScreen> {
                   FormUI(),
                   SizedBox(height: 15.0,),
                   FormTextField(),
-                  SizedBox(height: 15.0,),
                   FormBtnSignup(),
-                  SizedBox(height: 20.0,),
                 ],
                 ),
               ),
@@ -279,27 +304,26 @@ class SignupScreenState extends State<SignupScreen> {
                   //suffixStyle: const TextStyle(color: Colors.green)
                   ),
                 ),
-              SizedBox(height: 10.0),
-/*//------------------------------------------------------------------------------------------------------------//
 
-              TextFormField(
-                autocorrect: false,
-                obscureText: true,
-                validator: (value) =>
-                value.isEmpty ? "Password can't be empty" : null,
-                onSaved: (val) => ConfirmPassword = val,
-                decoration: new InputDecoration(
-                  border: new OutlineInputBorder(),
-                  hintText: 'Enter Confirm Password',hintStyle: TextStyle(fontSize: 12.0, color:ColorCode.BlackTextColorCode),
-                  //helperText: 'Keep it short, this is just a demo.',
-                  labelText: 'Confirm Password',labelStyle:
-                new TextStyle(fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300),
-                  prefixIcon: const Icon(Icons.lock, color:Color(0xFFCEA910),),
-                  prefixText: ' ',
-                  //suffixText: 'USD',
-                  //suffixStyle: const TextStyle(color: Colors.green)
-                  ),
-                ),*/
+//------------------------------------------------------------------------------------------------------------//
+              new Padding(
+                padding: EdgeInsets.only(
+                    left: 0.0, right: 0.0),
+                child: Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton(
+                      isExpanded: true,
+                      icon: Icon(FontAwesomeIcons.shoppingCart,color:Color(0xFFCEA910),size: 20.0,),
+                      value: _selectedCompany,
+                      items: _dropdownMenuItems,
+                      onChanged: onChangeDropdownItem,
+                      style: TextStyle(
+                        fontSize: 14.0, color:ColorCode.BlackTextColorCode,fontWeight: FontWeight.w300,),
+                      ),
+                    ),
+                  )
+                ),
             ],
             ),
           ),
@@ -313,21 +337,17 @@ class SignupScreenState extends State<SignupScreen> {
         margin: EdgeInsets.only(left: 20.0,right: 20.0),
         child: Row(children: <Widget>[
           Expanded(
-            child: RaisedButton(
+            child: new FlatButton.icon(
+              shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(18.0),
+                  side: BorderSide(color: ColorCode.AppColorCode)),
               color: ColorCode.AppColorCode,
-              child:  Text(
-                GlobalStringText.Register,
-                style: TextStyle(color: ColorCode.WhiteTextColorCode,fontWeight: FontWeight.bold,fontSize: _large? 14: (_medium? 12: 10)),
-                ),
+              icon: Icon(FontAwesomeIcons.registered,color: Colors.white,size: 18.0,), //`Icon` to display
+              label: Text(GlobalStringText.Register.toUpperCase(),style: TextStyle(fontSize: 15.0, color: Colors.white,fontWeight: FontWeight.bold,)), //`Text` to display
               onPressed: () {
                 _sendToServer();
               },
               ),
-            ),
-          new Container(
-            color: ColorCode.WhiteTextColorCode,
-            height: 50.0,
-            width: 1.0,
             ),
         ])
         ),
@@ -520,3 +540,16 @@ class SignupScreenState extends State<SignupScreen> {
   }
 }
 //----------------------------------------------------------------------------------------------//
+class Company {
+  int id;
+  String name;
+
+  Company(this.id, this.name);
+
+  static List<Company> getCompanies() {
+    return <Company>[
+      Company(1, 'BUYER'),
+      Company(2, 'SELLER'),
+    ];
+  }
+}

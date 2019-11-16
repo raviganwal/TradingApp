@@ -7,7 +7,7 @@ class GlobalStringText {
   static String descriptionSweetTamarind="Ye indulgence unreserved connection alteration appearance";
   static String titletamarindimli="tamarind imli";
   static String descriptiontamarindimli="Much evil soon high in hope do view. Out may few northward believing attempted. Yet timed being songs marry one defer men our. Although finished blessing do";
-  static String Forgot="Forgot your password?";
+  static String Forgot="Forgot Your Password?";
   static String Signup="SIGN UP";
   static String Login="Login";
   static String Register="Register";
@@ -27,6 +27,7 @@ class GlobalStringText {
   static String notconnectednetwork = 'You are not connected to a network';
   static String SomethingWentWrong  = 'Something Went Wrong.. ';
   static String DataNotAvilable  = 'Data Not Avilable Here';
+  static String LogOut  = 'Do You Want to Exit An App';
   static String TryAgain  = 'Try Again';
   static String Price  = 'Price';
   static String ProductDescription = 'Description';

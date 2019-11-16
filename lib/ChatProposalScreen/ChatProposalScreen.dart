@@ -521,20 +521,52 @@ class _ChatProposalScreenState extends State<ChatProposalScreen>{
       },
       );
   }
-//---------------------------------------------------------------------------------------------------//
-  void TapMessage(BuildContext context, String message) {
-    var alert = new AlertDialog(
-      title: new Text('Want to logout?'),
-      content: new Text(message),
-      actions: <Widget>[
-        new FlatButton(
-            onPressed: () {
-              removeData(context);
-            },
-            child: new Text('OK'))
-      ],
+  //------------------------------------------AlertDilogTapMessage------------------------------------//
+  Future<void> TapMessage(BuildContext context, String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(message, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(GlobalStringText.LogOut.toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.BlackTextColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.Cancle, style: new TextStyle(fontSize: 15.0,
+                                                                            color: ColorCode.GreenTextColorCode,
+                                                                            fontWeight: FontWeight
+                                                                                .bold),),
+              ),
+            FlatButton(
+              onPressed: () {
+                removeData(context);
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                        color: ColorCode.RedTextColorCode,
+                                                                        fontWeight: FontWeight
+                                                                            .bold),),
+              ),
+
+          ],
+          );
+      },
       );
-    showDialog(context: context, child: alert);
   }
 //---------------------------------------------------------------------------------------------------//
   removeData(BuildContext context) async {

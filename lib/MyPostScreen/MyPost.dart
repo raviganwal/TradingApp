@@ -30,13 +30,14 @@ class _MyPostState extends State<MyPost>{
   var loading = true;
   String status = '';
   String errMessage = GlobalStringText.errMessage;
-  var data;
+  var dataMyPostData;
   List<JSONDATA> _listMyPost = [];
   String ReciveAdv_ID = '';
   String ReciveTitle = '';
   var ReciveUserID="";
   var ReciveUserEmail="";
   var ReciveUserFullName="";
+  var MyPostDataGetStatus ="";
 //----------------------------------------------------------------------------------------------//
   @override
   void initState() {
@@ -57,26 +58,25 @@ class _MyPostState extends State<MyPost>{
       print("Url"+MyPostDataurl);
       setStatus(resultMyPostData.statusCode == 200 ? resultMyPostData.body : errMessage);
       print("jsonresp ${resultMyPostData.body}");
-      loading = false;
-      data = json.decode(resultMyPostData.body);
-
-
-      if(!data['Status']) {
-        _StatusFalseAlert(context);
-        loading = false;
-        return;
-      }
-      else{
+      dataMyPostData = json.decode(resultMyPostData.body);
+      MyPostDataGetStatus = dataMyPostData["Status"].toString();
+//--------------------------------------------------------------------------------------//
+      if(MyPostDataGetStatus == "true"){
+        print("true");
         final ExtractData = jsonDecode(resultMyPostData.body);
-        data = ExtractData["JSONDATA"];
-        //print(data.toString());
+        dataMyPostData = ExtractData["JSONDATA"];
         setState(() {
-          for (Map i in data) {
+          for (Map i in dataMyPostData) {
             _listMyPost.add(JSONDATA.fromJson(i));
             loading = false;
           }
         });
+      }else if(MyPostDataGetStatus == "false"){
+        print("false");
+        loading = false;
+        _StatusFalseAlert(context);
       }
+//--------------------------------------------------------------------------------------//
     }).catchError((error) {
       setStatus(error);
     });
@@ -579,25 +579,62 @@ class _MyPostState extends State<MyPost>{
       },
       );
   }
-//---------------------------------------------------------------------------------------------------//
-  void TapMessage(BuildContext context, String message) {
-    var alert = new AlertDialog(
-      title: new Text('Want to logout?'),
-      content: new Text(message),
-      actions: <Widget>[
-        new FlatButton(
-            onPressed: () {
-              removeData(context);
-            },
-            child: new Text('OK'))
-      ],
+  //------------------------------------------AlertDilogTapMessage------------------------------------//
+  Future<void> TapMessage(BuildContext context, String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(message, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(GlobalStringText.LogOut.toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.BlackTextColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.Cancle, style: new TextStyle(fontSize: 15.0,
+                                                                            color: ColorCode.GreenTextColorCode,
+                                                                            fontWeight: FontWeight
+                                                                                .bold),),
+              ),
+            FlatButton(
+              onPressed: () {
+                removeData(context);
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                        color: ColorCode.RedTextColorCode,
+                                                                        fontWeight: FontWeight
+                                                                            .bold),),
+              ),
+
+          ],
+          );
+      },
       );
-    showDialog(context: context, child: alert);
   }
 //---------------------------------------------------------------------------------------------------//
   removeData(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
+    prefs.remove(Preferences.KEY_FullName);
+    prefs.remove(Preferences.KEY_UserID);
+    prefs.remove(Preferences.KEY_Email);
     prefs.remove(Preferences.KEY_UserStatus);
+    prefs.remove(Preferences.KEY_FirstNAME);
+    prefs.remove(Preferences.KEY_LastNAME);
     Navigator.of(context).pushNamed(SplashScreen.tag);
   }
 }

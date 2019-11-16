@@ -15,6 +15,7 @@ import 'package:tradingapp/Model/ProfileViewModel.dart';
 import 'package:tradingapp/Preferences/Preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:tradingapp/SplashScreen/SplashScreen.dart';
 //----------------------------------------------------------------------------------------------//
 class MyAccountScreen extends StatefulWidget {
   static String tag = GlobalStringText.tagMyAccountScreen;
@@ -62,7 +63,10 @@ class MyAccountScreenState extends State<MyAccountScreen> {
   GlobalKey<FormState> _key = new GlobalKey();
   bool _validate = false;
   String FirstName,LastName,Mobile;
+  var ProfileupdateStatus = "";
+  var ProfileupdateMSG = "";
 
+  var GetProfileDataStatus = "";
 //---------------------------------------------------------------------------------------------------//
   String GetProfileDataurl ='http://192.168.0.200/anuj/ATMA/MyProfile.php';
   GetProfileData() async {
@@ -83,12 +87,11 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       setStatus(resultGetProfileData.statusCode == 200 ? resultGetProfileData.body : errMessage);
       //print("jsonresp ${resultGetProfileData.body}");
       data = json.decode(resultGetProfileData.body);
-      if(!data['Status']) {
-        _StatusFalseAlert(context);
-        loading = false;
-        return;
-      }
-      else{
+
+      GetProfileDataStatus = data["Status"].toString();
+
+      if(GetProfileDataStatus == "true") {
+        loading = true;
         final ExtractData = jsonDecode(resultGetProfileData.body);
         data = ExtractData["JSONDATA"];
         print(data.toString());
@@ -105,6 +108,11 @@ class MyAccountScreenState extends State<MyAccountScreen> {
           ProfileLastNameController.text = ReciveDataUserLastName;
           ProfileMobileNumberController.text = ReciveDataUserMobile;
         });
+        return;
+      }
+      else if(GetProfileDataStatus == "false"){
+        GetProfileDataStatusFalseAlert(context);
+        return;
       }
 //------------------------------------------------------------------------------------------------------------//
     }).catchError((error) {
@@ -144,14 +152,18 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       setStatus(resultUpdateProfileData.statusCode == 200 ? resultUpdateProfileData.body : errMessage);
       //print("jsonresp ${resultGetProfileData.body}");
       dataProfileUpdate = json.decode(resultUpdateProfileData.body);
-      if(!dataProfileUpdate['status']==true) {
+
+      ProfileupdateStatus = dataProfileUpdate["status"].toString();
+      ProfileupdateMSG = dataProfileUpdate["MSG"].toString();
+
+      if(ProfileupdateStatus == "true"){
         _displaySnackbar(context);
-        _StatusTrueAlert();
-        return;
-      }else if (!dataProfileUpdate['status']==false){
+        ProfileUpdateStatusTrueAlert();
+      }else if(ProfileupdateStatus == "false"){
         _displaySnackbar(context);
-        _StatusFalseMessage();
+        ProfileUpdateStatusFalseAlert();
       }
+
 //------------------------------------------------------------------------------------------------------------//
     }).catchError((error) {
       setStatus(error);
@@ -166,20 +178,21 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       ));
   }
 //-----------------------------------------------------------------------------------------------//
-  Future<void> _StatusTrueAlert() async {
+  Future<void> ProfileUpdateStatusTrueAlert() async {
+    print("StatusTrue");
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(GlobalStringText.Warning, textAlign: TextAlign.center,
+          title: Text(GlobalStringText.Thanks, textAlign: TextAlign.center,
                         style: new TextStyle(fontSize: 15.0,
                                                  color: ColorCode.AppColorCode,
                                                  fontWeight: FontWeight.bold),),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text(dataProfileUpdate['MSG'].toString(),
+                Text(ProfileupdateMSG.toString(),
                        textAlign: TextAlign.center,
                        style: new TextStyle(fontSize: 12.0,
                                                 color: ColorCode.AppColorCode,
@@ -204,20 +217,21 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       );
   }
 //-----------------------------------------------------------------------------------------------//
-  Future<void> _StatusFalseMessage() async {
+  Future<void> ProfileUpdateStatusFalseAlert() async {
+    print("StatusFalse");
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(GlobalStringText.Thanks, textAlign: TextAlign.center,
+          title: Text(GlobalStringText.Warning, textAlign: TextAlign.center,
                         style: new TextStyle(fontSize: 15.0,
                                                  color: ColorCode.AppColorCode,
                                                  fontWeight: FontWeight.bold),),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text(dataProfileUpdate['MSG'].toString(),
+                Text(ProfileupdateMSG.toString(),
                        textAlign: TextAlign.center,
                        style: new TextStyle(fontSize: 12.0,
                                                 color: ColorCode.AppColorCode,
@@ -241,9 +255,58 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       },
       );
   }
+  //----------------------------------------------------------------------------------------------------------//
+  void _checkInternetConnectivity(BuildContext context) async {
+    var result = await Connectivity().checkConnectivity();
+    if (result == ConnectivityResult.none) {
+      _InterNetshowDialog(
+          GlobalStringText.Nointernet,
+          GlobalStringText.notconnectednetwork
+          );
+    }
+  }
+//--------------------------------------------------------------------------------------------------------//
+  Future<void> _InterNetshowDialog(title, text) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(GlobalStringText.InternetWarning, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(title.toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.AppColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                //("hello123"+id.toString());
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                        color: ColorCode.AppColorCode,
+                                                                        fontWeight: FontWeight
+                                                                            .bold),),
+              ),
+          ],
+          );
+      },
+      );
+  }
 //----------------------------------------------------------------------------------------------//
   @override
   void initState() {
+    this._checkInternetConnectivity(context);
     super.initState();
     this.GetProfileData();
 
@@ -553,6 +616,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       height: 120,
       color: ColorCode.AppColorCode,
       padding: EdgeInsets.only(top: 30.0),
+
       child: new Stack(fit: StackFit.loose, children: <Widget>[
         SizedBox(
           // height: 210,
@@ -590,6 +654,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
     return new Column(
       children: <Widget>[
         new FadeAnimation(2, Container(
+
           child: new ListView(
             padding: EdgeInsets.only(left: 20.0, right: 20.0),
             controller: _scrollController,
@@ -720,6 +785,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       // No any error in validation
       _key.currentState.save();
       print("true");
+      _checkInternetConnectivity(context);
       UpdateProfileData();
     } else {
       // validation error
@@ -729,8 +795,8 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       });
     }
   }
-  //--------------------------------------------------------------------------------------//
-  Future<void> TrueAlert(BuildContext context) async {
+  //--------------------------------------------------------------------------------------------------------//
+  Future<void> GetProfileDataStatusFalseAlert(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -743,45 +809,7 @@ class MyAccountScreenState extends State<MyAccountScreen> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text(data['MSG'].toString(),
-                       textAlign: TextAlign.center,
-                       style: new TextStyle(fontSize: 12.0,
-                                                color: ColorCode.AppColorCode,
-                                                fontWeight: FontWeight.bold),),
-              ],
-              ),
-            ),
-          actions: <Widget>[
-            FlatButton(
-              onPressed: () {
-                _scaffoldKey.currentState.hideCurrentSnackBar();
-                Navigator.of(context).pop();
-              },
-              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
-                                                                        color: ColorCode.AppColorCode,
-                                                                        fontWeight: FontWeight
-                                                                            .bold),),
-              ),
-          ],
-          );
-      },
-      );
-  }
-  //--------------------------------------------------------------------------------------------------------//
-  Future<void> _StatusFalseAlert(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(GlobalStringText.Thanks, textAlign: TextAlign.center,
-                        style: new TextStyle(fontSize: 15.0,
-                                                 color: ColorCode.AppColorCode,
-                                                 fontWeight: FontWeight.bold),),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(data['MSG'].toString(),
+                Text(GlobalStringText.SomethingWentWrong.toString(),
                        textAlign: TextAlign.center,
                        style: new TextStyle(fontSize: 12.0,
                                                 color: ColorCode.AppColorCode,
@@ -811,26 +839,63 @@ class MyAccountScreenState extends State<MyAccountScreen> {
       },
       );
   }
-  //---------------------------------------------------------------------------------------------------//
-  void TapMessage(BuildContext context, String message) {
-    var alert = new AlertDialog(
-      title: new Text('Want to logout?'),
-      content: new Text(message),
-      actions: <Widget>[
-        new FlatButton(
-            onPressed: () {
-              removeData(context);
-            },
-            child: new Text('OK'))
-      ],
+  //------------------------------------------AlertDilogTapMessage------------------------------------//
+  Future<void> TapMessage(BuildContext context, String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(message, textAlign: TextAlign.center,
+                        style: new TextStyle(fontSize: 15.0,
+                                                 color: ColorCode.AppColorCode,
+                                                 fontWeight: FontWeight.bold),),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(GlobalStringText.LogOut.toString(),
+                       textAlign: TextAlign.center,
+                       style: new TextStyle(fontSize: 12.0,
+                                                color: ColorCode.BlackTextColorCode,
+                                                fontWeight: FontWeight.bold),),
+              ],
+              ),
+            ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(GlobalStringText.Cancle, style: new TextStyle(fontSize: 15.0,
+                                                                            color: ColorCode.GreenTextColorCode,
+                                                                            fontWeight: FontWeight
+                                                                                .bold),),
+              ),
+            FlatButton(
+              onPressed: () {
+                removeData(context);
+              },
+              child: Text(GlobalStringText.ok, style: new TextStyle(fontSize: 15.0,
+                                                                        color: ColorCode.RedTextColorCode,
+                                                                        fontWeight: FontWeight
+                                                                            .bold),),
+              ),
+
+          ],
+          );
+      },
       );
-    showDialog(context: context, child: alert);
   }
 //---------------------------------------------------------------------------------------------------//
   removeData(BuildContext context) async {
-    /*final prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(Preferences.KEY_FullName);
+    prefs.remove(Preferences.KEY_UserID);
+    prefs.remove(Preferences.KEY_Email);
     prefs.remove(Preferences.KEY_UserStatus);
-    Navigator.of(context).pushNamed(SplashScreen.tag);*/
+    prefs.remove(Preferences.KEY_FirstNAME);
+    prefs.remove(Preferences.KEY_LastNAME);
+    Navigator.of(context).pushNamed(SplashScreen.tag);
   }
   //---------------------------------------------------------------------------------------------//
   String validateFirstName(String value) {
